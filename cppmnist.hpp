@@ -31,7 +31,7 @@ private:
 	void read_header();
 	void read_payload();
 public:
-	const std::vector<std::vector<std::vector<T>>>& data();
+	const std::vector<std::vector<std::vector<T>>>& data() const;
 	Images(std::string filename);
 	~Images();
 };
@@ -48,7 +48,7 @@ Images<T>::~Images() {
 }
 
 template<typename T>
-const std::vector<std::vector<std::vector<T>>>& Images<T>::data() {
+const std::vector<std::vector<std::vector<T>>>& Images<T>::data() const{
 	return this->data_;
 }
 
@@ -114,7 +114,7 @@ void Images<bool>::read_payload() {
 	}
 }
 
-template<typename T = int>
+template<std::integral T=int, typename U=double>
 class Labels{
 private:
 	std::vector<T> data_;
@@ -123,22 +123,32 @@ private:
 	std::uint32_t num_;
 	void read();
 public:
-	const std::vector<T>& data();
+	const std::vector<T>& data() const;
+	std::vector<std::vector<U>> onehot() const;
 	Labels(std::string filename);
 };
 
-template<typename T>
-Labels<T>::Labels(std::string filename): filename_(filename) {
+template<typename T, typename U>
+Labels<T, U>::Labels(std::string filename): filename_(filename) {
 	this->read();
 }
 
-template<typename T>
-const std::vector<T>& Labels<T>::data() {
+template<typename T, typename U>
+const std::vector<T>& Labels<T, U>::data() const {
 	return this->data_;
 }
 
-template<typename T>
-void Labels<T>::read() {
+template<typename T, typename U>
+std::vector<std::vector<U>> Labels<T, U>::onehot() const {
+	std::vector<std::vector<U>> mat(this->data_.size(), std::vector<U>(10, 0.0f));
+	for (std::size_t i = 0; i < this->data_.size(); i++) {
+		mat[i][this->data_[i]] = 1.0f;
+	}
+	return mat;
+}
+
+template<typename T, typename U>
+void Labels<T, U>::read() {
 	std::ifstream ifs(this->filename_, std::ios::in | std::ios::binary);
 	if (!ifs.is_open()) {
 		std::stringstream ss;

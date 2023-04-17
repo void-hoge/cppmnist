@@ -1,9 +1,11 @@
 #include "cppmnist.hpp"
 
 int main() {
-	auto images = MNIST::Images<bool>("../t10k-images-idx3-ubyte");
-	auto labels = MNIST::Labels("../t10k-labels-idx1-ubyte");
-	for (int idx = 0; idx < 10; idx++) {
+	auto images = MNIST::Images<bool>("../train-images-idx3-ubyte");
+	auto labels = MNIST::Labels("../train-labels-idx1-ubyte");
+	auto onehot = labels.onehot();
+	int cnt = 0;
+	for (int idx = 0; idx < 100; idx++) {
 		for (const auto& row: images.data()[idx]) {
 			for (const auto& pixel: row) {
 				if (pixel == false) {
@@ -14,7 +16,17 @@ int main() {
 			}
 			std::cout << std::endl;
 		}
-		std::cout << labels.data()[idx] << std::endl;
+		int tmp;
+		std::cout << idx << " out of " << 100 << std::endl;
+		std::cin >> tmp;
+		if (tmp == labels.data()[idx]) {
+			std::cout << "Correct!" << std::endl;
+			cnt++;
+		}else {
+			std::cout << "Wrong! The answer is "
+					  << labels.data()[idx] << "." << std::endl;
+		}
 	}
+	std::cout << cnt << std::endl;
 	return 0;
 }
